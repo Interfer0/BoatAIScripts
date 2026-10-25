@@ -11,7 +11,7 @@ Every step has the same three parts:
 - **If the check fails** — the one thing to try. Only that thing.
 
 You need before you start: an Ubuntu Desktop 24.04 or 26.04 VM,
-internet, a Telegram account, a Tailscale account, and (for Step 8)
+internet, a Telegram account, a Tailscale account, and (for Step 7)
 a Notion account. The `hermes` commands run as the service user —
 the user you installed with, usually your own username — not as
 root. If a `hermes` command says "command not found" in a fresh
