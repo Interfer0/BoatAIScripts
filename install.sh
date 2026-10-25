@@ -17,7 +17,11 @@
 # this script does not delete your old data.
 #
 # Usage:
-#   sudo ./install.sh [--user boat] [--dry-run] [--no-webui-start]
+#   sudo bash install.sh [--user boat] [--dry-run] [--no-webui-start]
+#   (Run via bash on purpose: install.sh is stored mode 100644 in git
+#   — the push tool does not preserve the executable bit — so ./install.sh
+#   fails with "Permission denied" after a fresh clone. `chmod +x install.sh`
+#   also works, but bash works regardless.)
 #
 # The script is idempotent: safe to re-run to update or repair. It never
 # overwrites an existing /opt/tallyho/.env, and never prints tokens.
@@ -345,7 +349,7 @@ Tally Ho boat box — install complete (Hermes edition). Next steps:
        python3 pull_notion.py && python3 render.py
      (then it refreshes twice daily via tallyho-mirror-pull.timer)
      Fill NOTION_TOKEN in /opt/tallyho/.env first.
-  6. Re-run this script any time to update/repair: sudo ./install.sh
+  6. Re-run this script any time to update/repair: sudo bash install.sh
      (it never overwrites .env; update Hermes Agent + WebUI TOGETHER)
 ================================================================
 EOF

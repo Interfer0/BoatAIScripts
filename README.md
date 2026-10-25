@@ -58,8 +58,14 @@ voice wrappers are gone with the old edition).
 On the VM, from this directory:
 
 ```bash
-sudo ./install.sh
+sudo bash install.sh
 ```
+
+Run it via `bash` on purpose: `install.sh` is stored without the
+executable bit in git (the tool used to push it does not preserve
+file modes), so `./install.sh` fails with "Permission denied" after
+a fresh clone. `chmod +x install.sh && sudo ./install.sh` works too,
+but the `bash` form works regardless.
 
 Options: `--user <name>` (default: your sudo user, or `boat`),
 `--dry-run` (print privileged commands, stage files to override dirs),

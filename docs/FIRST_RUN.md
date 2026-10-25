@@ -16,9 +16,11 @@ first: `source ~/.bashrc`.
 ```bash
 git clone https://github.com/Interfer0/BoatAIScripts.git
 cd BoatAIScripts
-sudo ./install.sh
+sudo bash install.sh
 ```
 
+Run it via `bash`: after a fresh clone `install.sh` is not marked
+executable in git, so `./install.sh` gives "Permission denied".
 Re-running `install.sh` later is safe (it never overwrites `.env`).
 
 ## 2. Set up Hermes Agent (model first)
