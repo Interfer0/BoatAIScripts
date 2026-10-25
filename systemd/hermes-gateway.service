@@ -1,0 +1,17 @@
+[Unit]
+Description=Hermes Agent Telegram (and messaging) gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__SERVICE_USER__
+# Login shell so the `hermes` command installed for this user is on PATH.
+ExecStart=/bin/bash -lc 'hermes gateway'
+Restart=always
+RestartSec=10
+# The gateway exits until `hermes gateway setup` is done — expected
+# before first configuration. Set it up, then: systemctl restart hermes-gateway
+
+[Install]
+WantedBy=multi-user.target

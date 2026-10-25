@@ -1,0 +1,19 @@
+[Unit]
+Description=Hermes WebUI (nesquena/hermes-webui via ctl.sh daemon)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=__SERVICE_USER__
+WorkingDirectory=__HERMES_WEBUI_DIR__
+EnvironmentFile=/opt/tallyho/.env
+# ctl.sh start backgrounds the server itself (PID at ~/.hermes/webui.pid,
+# logs at ~/.hermes/webui.log) and respects HERMES_WEBUI_* env overrides.
+ExecStart=__HERMES_WEBUI_DIR__/ctl.sh start
+ExecStop=__HERMES_WEBUI_DIR__/ctl.sh stop
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target
