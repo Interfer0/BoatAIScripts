@@ -79,6 +79,9 @@ warns version skew is untested/unsupported.
 
 ## Setup docs (read these after install)
 
+- `docs/STEP_BY_STEP.md` — **start here.** The setup in order,
+  one action and one check per step, with one thing to try if
+  a step fails. This is the guide for first-time users.
 - `docs/FIRST_RUN.md` — the full first-run order: model setup,
   WebUI onboarding, workspace, Telegram, Tailscale, mirror pull,
   and the test checklist (including a reboot/autostart test).
