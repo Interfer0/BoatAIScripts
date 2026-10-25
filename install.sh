@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tally Ho boat box — install script (Hermes Agent + Hermes WebUI edition).
 #
-# Installs, on Ubuntu Desktop 24.04 (VM guest):
+# Installs, on Ubuntu Desktop 24.04 or 26.04 LTS (VM guest):
 #   Hermes Agent (Nous Research, official installer) + Hermes WebUI
 #   (nesquena/hermes-webui, native, port 8787, exposed to the local
 #   network with password auth, autostarting on boot via systemd),
@@ -49,7 +49,7 @@ done
 
 if [ "$DRY_RUN" != "1" ] && [ "$(id -u)" != "0" ]; then
     echo "Re-running under sudo…"
-    exec sudo "$0" "${ORIGINAL_ARGS[@]}"
+    exec sudo FORCE_OS="${FORCE_OS:-0}" "$0" "${ORIGINAL_ARGS[@]}"
 fi
 if [ -z "$SERVICE_USER" ]; then SERVICE_USER="boat"; fi
 
@@ -69,13 +69,21 @@ run() {
 }
 
 # --- OS guard ---------------------------------------------------------------
+# Tested on Ubuntu Desktop 24.04 (noble) and 26.04 (resolute) LTS.
+# Other Ubuntu versions proceed with a warning (apt packages and the
+# dynamic Tailscale codename below usually just work); non-Ubuntu
+# systems still require FORCE_OS=1, which is now preserved through
+# the sudo re-exec above.
 if [ -f /etc/os-release ]; then
     # shellcheck disable=SC1091
     . /etc/os-release
-    if [ "${ID:-}" != "ubuntu" ] || [ "${VERSION_ID:-}" != "24.04" ]; then
-        warn "This script targets Ubuntu 24.04 (found ${ID:-?} ${VERSION_ID:-?})."
+    if [ "${ID:-}" != "ubuntu" ]; then
+        warn "This script targets Ubuntu (found ${ID:-?} ${VERSION_ID:-?})."
         warn "Set FORCE_OS=1 to run anyway."
         [ "${FORCE_OS:-0}" = "1" ] || exit 1
+    elif [ "${VERSION_ID:-}" != "24.04" ] && [ "${VERSION_ID:-}" != "26.04" ]; then
+        warn "Untested Ubuntu version ${VERSION_ID:-?} (tested: 24.04, 26.04) — proceeding anyway."
+        warn "If a package or repo fails below, report the exact error."
     fi
 fi
 
@@ -110,12 +118,23 @@ run apt-get install -y -qq openssh-server ufw nginx \
 if ! command -v tailscale >/dev/null 2>&1 || [ "$DRY_RUN" = "1" ]; then
     log "Installing Tailscale"
     if [ "$DRY_RUN" = "1" ]; then
-        echo "[dry-run] install tailscale apt repo + apt-get install -y tailscale"
+        echo "[dry-run] install tailscale apt repo (codename: $(lsb_release -cs 2>/dev/null || echo noble)) + apt-get install -y tailscale"
     else
+        # Codename comes from the running system (noble on 24.04,
+        # resolute on 26.04), NOT hardcoded — the old hardcoded noble
+        # repo was part of why non-24.04 installs failed. If Tailscale
+        # has not published a repo for this codename yet, fall back
+        # to noble and warn (its packages usually still install).
+        TS_CODENAME="$(lsb_release -cs 2>/dev/null || echo noble)"
         mkdir -p /usr/share/keyrings
-        curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/noble.noarmor.gpg \
-            -o /usr/share/keyrings/tailscale-archive-keyring.gpg
-        curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/noble.tailscale-keyring.list \
+        if ! curl -fsSL "https://pkgs.tailscale.com/stable/ubuntu/${TS_CODENAME}.noarmor.gpg" \
+            -o /usr/share/keyrings/tailscale-archive-keyring.gpg; then
+            warn "No Tailscale repo for codename $TS_CODENAME — falling back to noble"
+            TS_CODENAME="noble"
+            curl -fsSL "https://pkgs.tailscale.com/stable/ubuntu/${TS_CODENAME}.noarmor.gpg" \
+                -o /usr/share/keyrings/tailscale-archive-keyring.gpg
+        fi
+        curl -fsSL "https://pkgs.tailscale.com/stable/ubuntu/${TS_CODENAME}.tailscale-keyring.list" \
             -o /etc/apt/sources.list.d/tailscale.list
         apt-get update -qq
         apt-get install -y -qq tailscale
@@ -125,7 +144,7 @@ else
 fi
 
 # --- Chromium ---------------------------------------------------------------
-# On Ubuntu 24.04 the apt package is the Chromium snap build, so this
+# On Ubuntu 24.04/26.04 the apt package is the Chromium snap build, so this
 # also needs snapd (installed above). This is a Desktop install, so
 # Chromium opens normally in the GUI; `chromium --headless` also works.
 if command -v chromium >/dev/null 2>&1 || command -v chromium-browser >/dev/null 2>&1; then

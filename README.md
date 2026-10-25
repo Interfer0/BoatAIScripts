@@ -1,6 +1,7 @@
 # Tally Ho boat box — install bundle (Hermes edition)
 
-Installs the boat assistant stack on an **Ubuntu Desktop 24.04 VM guest**:
+Installs the boat assistant stack on an **Ubuntu Desktop 24.04 or 26.04 LTS VM guest**
+(other Ubuntu versions proceed with a warning; non-Ubuntu needs `FORCE_OS=1`):
 **Hermes Agent** (Nous Research) + **Hermes WebUI**
 (nesquena/hermes-webui), with nginx, Tailscale, Chromium, and the
 Notion read-only mirror.
@@ -38,7 +39,7 @@ this script does not delete your old data.
   pull+render timer twice daily + on boot. Read-only: Hermes reads
   it, it never edits Notion.
 - **Chromium** — browser for the box, opening normally in the
-  Desktop GUI (on Ubuntu 24.04 the apt package is the Chromium
+  Desktop GUI (on Ubuntu 24.04/26.04 the apt package is the Chromium
   snap build; snapd is installed with it).
 - **Automatic suspend disabled** — a desktop install suspends on
   idle by default, which would take the services down. The script
