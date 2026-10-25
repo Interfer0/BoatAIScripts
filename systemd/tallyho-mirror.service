@@ -1,0 +1,15 @@
+[Unit]
+Description=Tally Ho Notion mirror server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__SERVICE_USER__
+WorkingDirectory=/opt/tallyho/notion-mirror
+ExecStart=/usr/bin/python3 /opt/tallyho/notion-mirror/serve.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,14 @@
+[Unit]
+Description=Tally Ho Notion mirror pull + render (one run)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=__SERVICE_USER__
+WorkingDirectory=/opt/tallyho/notion-mirror
+EnvironmentFile=/opt/tallyho/.env
+# Pull is incremental: unchanged pages are skipped. If Notion is
+# unreachable (offline on the boat) this fails quietly and the timer
+# retries; the last good snapshot keeps serving meanwhile.
+ExecStart=/bin/bash -c '/usr/bin/python3 pull_notion.py --incremental && /usr/bin/python3 render.py'
